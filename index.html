@@ -427,7 +427,18 @@ function setDbSt(ok) {
   $('dbst').textContent = ok ? '🟢 Verbunden (live)' : '🔴 Nicht verbunden';
   $('dbst').style.color = ok ? '#14532d' : '#dc2626';
 }
+function openFromURL() {
+  const path = window.location.pathname.replace("/", "").toLowerCase();
+  if (!path) return;
 
+  const found = Object.entries(articles).find(([id, a]) =>
+    (a.title || "").toLowerCase() === path
+  );
+
+  if (found) {
+    showArticle(found[0]);
+  }
+}
 // ── FIREBASE ──
 function loadCfg() { try { return JSON.parse(localStorage.getItem('vx_fb')||'null'); } catch(e){ return null; } }
 
@@ -456,6 +467,7 @@ function initFB(cfg) {
   } catch(e) {
     hideLoad(); setDbSt(false);
     notify('Firebase-Fehler: ' + e.message, 'e');
+    openFromURL();
   }
 }
 
