@@ -443,49 +443,49 @@ function openFromURL() {
 function loadCfg() { try { return JSON.parse(localStorage.getItem('vx_fb')||'null'); } catch(e){ return null; } }
 
 function initFB(cfg) {
-  function initFB(cfg) {
   console.log("initFB läuft", cfg);
   showLoad('Verbinde mit Firebase…');
+
   try {
-    // Remove any existing app
+    // alte Apps löschen
     getApps().forEach(a => deleteApp(a));
+
     const app = initializeApp(cfg);
-console.log("App erstellt", app);
+    console.log("App erstellt", app);
+
     db = getDatabase(app);
-    db = getDatabase(app);
-console.log("DB:", db);
+    console.log("DB:", db);
+
     if (artRef) off(artRef);
     artRef = ref(db, 'articles');
-onValue(artRef, snap => {
-  articles = snap.val() || {};
 
-  hideLoad();
-  setDbSt(true);   // 👈 DAS FEHLT BEI DIR
+    onValue(artRef, snap => {
+      articles = snap.val() || {};
 
-  renderArts();
-  updateStats();
-  updateCats();
-
-  openFromURL();   // (für deine URLs)
-});
       hideLoad();
       setDbSt(true);
+
       $('statusbar').classList.add('show');
+
       renderArts();
       updateStats();
       updateCats();
       updateCdl();
+
+      openFromURL();
+
     }, err => {
-      hideLoad(); setDbSt(false);
+      hideLoad();
+      setDbSt(false);
       notify('DB-Fehler: ' + err.message, 'e');
     });
-     openFromURL();
+
   } catch(e) {
-    hideLoad(); setDbSt(false);
+    hideLoad();
+    setDbSt(false);
     notify('Firebase-Fehler: ' + e.message, 'e');
   }
 }
-
 // ── SETUP ──
 window.openSetup = () => {
   const c = loadCfg();
