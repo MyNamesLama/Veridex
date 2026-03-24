@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veridex – Die freie Wissenssammlung</title>
+<link href="https://fonts.googleapis.com/css2?family=Linux+Libertine+Display:ital,wght@0,400;0,700;1,400&family=Linux+Biolinum:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f6f4;
+    --surface: #ffffff;
+    --border: #a2a9b1;
+    --border-light: #ddd;
+    --text: #202122;
+    --text-muted: #54595d;
+    --text-light: #72777d;
+    --link: #3366cc;
+    --link-visited: #6b4ea8;
+    --link-hover: #447ff5;
+    --accent: #1e4d94;
+    --accent-light: #eaf3fb;
+    --header-bg: #ffffff;
+    --sidebar-bg: #f8f9fa;
+    --toc-bg: #f8f9fa;
+    --warn: #ac6600;
+    --warn-bg: #fef6e7;
+    --success: #14532d;
+    --success-bg: #f0fdf4;
+    --toolbar-bg: #f8f9fa;
+    --toolbar-border: #c8ccd1;
+    --editor-font: 'Source Serif 4', Georgia, serif;
+    --ui-font: 'Linux Biolinum', 'Liberation Sans', Arial, sans-serif;
+    --display-font: 'Linux Libertine Display', 'Linux Libertine', Georgia, serif;
+    --tag-bg: #eaecf0;
+    --tag-text: #202122;
+    --modal-overlay: rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--ui-font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; color: var(--link-hover); }
+  a:visited { color: var(--link-visited); }
+
+  /* ── HEADER ── */
+  #site-header {
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 54px;
+  }
+
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+
+  .logo-name {
+    font-family: var(--display-font);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .logo-tagline {
+    font-size: 11px;
+    color: var(--text-light);
+  }
+
+  .header-search {
+    flex: 1;
+    max-width: 500px;
+    display: flex;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0 14px;
+    height: 36px;
+    gap: 8px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .header-search:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(30,77,148,0.15);
+    background: white;
+  }
+
+  .header-search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    flex: 1;
+    font-family: var(--ui-font);
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .search-icon { color: var(--text-light); font-size: 15px; }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-family: var(--ui-font);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover { background: #163d78; border-color: #163d78; }
+
+  .btn-secondary {
+    background: white;
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover { background: var(--bg); }
+
+  /* ── SEARCH DROPDOWN ── */
+  .search-results {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    z-index: 200;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .search-wrap { position: relative; flex: 1; max-width: 500px; }
+
+  .search-result-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:hover { background: var(--accent-light); }
+
+  .sri-title { font-weight: 600; font-size: 14px; color: var(--text); }
+  .sri-excerpt { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .sri-icon { font-size: 18px; }
+
+  /* ── LAYOUT ── */
+  .page-wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    position: sticky;
+    top: 70px;
+  }
+
+  .sidebar-section {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .sidebar-section h3 {
+    font-family: var(--ui-font);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    padding: 8px 12px;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .sidebar-nav { list-style: none; }
+
+  .sidebar-nav li a {
+    display: block;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--link);
+    transition: background 0.1s;
+  }
+
+  .sidebar-nav li a:hover { background: var(--accent-light); text-decoration: none; }
+
+  .sidebar-nav li a.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .sidebar-stats {
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .sidebar-stats strong { color: var(--text); }
+
+  /* ── ARTICLE LIST (homepage) ── */
+  #article-list {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .al-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--sidebar-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .al-header h1 {
+    font-family: var(--display-font);
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .al-header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .articles-grid {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  .article-card {
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .article-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(30,77,148,0.1);
+  }
+
+  .ac-header {
+    padding: 10px 12px 8px;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .ac-title {
+    font-family: var(--display-font);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--link);
+  }
+
+  .ac-meta {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 3px;
+  }
+
+  .ac-excerpt {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .ac-tags { padding: 0 12px 10px; display: flex; gap: 4px; flex-wrap: wrap; }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 7px;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    border-radius: 3px;
+    font-size: 11px;
+  }
+
+  .empty-state {
+    padding: 48px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .empty-state .es-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state h2 { font-family: var(--display-font); font-size: 22px; font-weight: 400; margin-bottom: 8px; color: var(--text); }
+
+  /* ── ARTICLE VIEW ── */
+  #article-view { display: none; }
+
+  .article-tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--sidebar-bg);
+    overflow: hidden;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .article-tab {
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--link);
+    border-right: 1px solid var(--border-light);
+    transition: background 0.1s;
+  }
+
+  .article-tab:hover { background: white; }
+  .article-tab.active { background: white; font-weight: 600; color: var(--text); border-bottom: 2px solid white; margin-bottom: -1px; }
+
+  .article-content-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    padding: 24px 32px;
+    min-height: 400px;
+  }
+
+  .article-title-display {
+    font-family: var(--display-font);
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 8px;
+  }
+
+  .article-byline {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+  }
+
+  .article-body {
+    font-family: var(--editor-font);
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text);
+    max-width: 760px;
+  }
+
+  .article-body h1,
+  .article-body h2,
+  .article-body h3,
+  .article-body h4 {
+    font-family: var(--display-font);
+    font-weight: 700;
+    margin: 1.4em 0 0.5em;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 4px;
+  }
+
+  .article-body h1 { font-size: 26px; }
+  .article-body h2 { font-size: 22px; }
+  .article-body h3 { font-size: 18px; border-bottom: none; }
+  .article-body h4 { font-size: 15px; border-bottom: none; }
+
+  .article-body p { margin-bottom: 1em; }
+  .article-body ul, .article-body ol { margin: 0.8em 0 0.8em 2em; }
+  .article-body li { margin-bottom: 0.3em; }
+  .article-body blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: 16px;
+    margin: 1em 0;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .article-body a { color: var(--link); }
+  .article-body a:hover { text-decoration: underline; color: var(--link-hover); }
+  .article-body a:visited { color: var(--link-visited); }
+  .article-body strong { font-weight: 700; }
+  .article-body em { font-style: italic; }
+  .article-body u { text-decoration: underline; }
+  .article-body s { text-decoration: line-through; }
+
+  .article-tags-display {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .article-tags-display span { font-size: 12px; color: var(--text-muted); }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--link);
+    cursor: pointer;
+    margin-bottom: 12px;
+    padding: 4px 0;
+  }
+
+  .back-btn:hover { text-decoration: underline; }
+
+  /* ── EDITOR ── */
+  #editor-view { display: none; }
+
+  .editor-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .editor-header {
+    padding: 12px 16px;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .editor-header h2 {
+    font-family: var(--display-font);
+    font-size: 18px;
+    font-weight: 400;
+    flex: 1;
+  }
+
+  .editor-title-input {
+    width: 100%;
+    padding: 10px 14px;
+    font-family: var(--display-font);
+    font-size: 22px;
+    border: none;
+    border-bottom: 2px solid var(--border-light);
+    outline: none;
+    background: white;
+    color: var(--text);
+    transition: border-color 0.15s;
+  }
+
+  .editor-title-input:focus { border-bottom-color: var(--accent); }
+  .editor-title-input::placeholder { color: var(--text-light); }
+
+  .editor-meta-row {
+    padding: 10px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border-bottom: 1px solid var(--border-light);
+    background: #fafafa;
+    flex-wrap: wrap;
+  }
+
+  .editor-meta-row label { font-size: 12px; color: var(--text-muted); }
+
+  .editor-meta-row input[type="text"] {
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 13px;
+    outline: none;
+    background: white;
+    color: var(--text);
+    flex: 1;
+    min-width: 140px;
+    font-family: var(--ui-font);
+  }
+
+  .editor-meta-row input[type="text"]:focus { border-color: var(--accent); }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    background: var(--toolbar-bg);
+    border-bottom: 1px solid var(--toolbar-border);
+    display: flex;
+    flex-wrap: wrap;
+    padding: 4px 6px;
+    gap: 2px;
+    align-items: center;
+  }
+
+  .toolbar-sep {
+    width: 1px;
+    height: 22px;
+    background: var(--toolbar-border);
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+
+  .tb {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 26px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text);
+    background: transparent;
+    transition: background 0.1s, border-color 0.1s;
+    font-family: var(--ui-font);
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .tb:hover { background: var(--border-light); border-color: var(--border); }
+  .tb.active { background: #dde8f5; border-color: #97b6e3; }
+  .tb[title] { position: relative; }
+
+  .tb-select {
+    height: 26px;
+    padding: 0 4px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 12px;
+    font-family: var(--ui-font);
+    background: white;
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+  }
+
+  .tb-select:focus { border-color: var(--accent); }
+
+  .tb-color-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    height: 26px;
+  }
+
+  .tb-color-label {
+    padding: 0 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: #f0f0f0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .tb-color-input {
+    width: 30px;
+    height: 100%;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    background: white;
+  }
+
+  /* ── RICH TEXT EDITOR ── */
+  #rich-editor {
+    min-height: 420px;
+    padding: 20px 24px;
+    outline: none;
+    font-family: var(--editor-font);
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text);
+    background: white;
+    overflow-y: auto;
+  }
+
+  #rich-editor:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-light);
+    pointer-events: none;
+  }
+
+  #rich-editor h1 { font-family: var(--display-font); font-size: 26px; font-weight: 700; margin: 1.2em 0 0.4em; border-bottom: 1px solid var(--border-light); padding-bottom: 4px; }
+  #rich-editor h2 { font-family: var(--display-font); font-size: 21px; font-weight: 700; margin: 1.1em 0 0.4em; border-bottom: 1px solid var(--border-light); padding-bottom: 3px; }
+  #rich-editor h3 { font-family: var(--display-font); font-size: 17px; font-weight: 700; margin: 1em 0 0.3em; }
+  #rich-editor a { color: var(--link); text-decoration: underline; }
+  #rich-editor a:hover { color: var(--link-hover); }
+  #rich-editor blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--text-muted); font-style: italic; margin: 0.8em 0; }
+  #rich-editor ul, #rich-editor ol { margin: 0.5em 0 0.5em 2em; }
+  #rich-editor li { margin-bottom: 0.2em; }
+  #rich-editor p { margin-bottom: 0.6em; }
+
+  /* ── HYPERLINK MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--modal-overlay);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    width: 440px;
+    max-width: 95vw;
+    overflow: hidden;
+  }
+
+  .modal-header {
+    padding: 14px 18px;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h3 {
+    font-family: var(--display-font);
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .modal-close {
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .modal-close:hover { background: var(--border-light); }
+
+  .modal-body { padding: 18px; }
+
+  .modal-body label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .modal-body input[type="text"],
+  .modal-body input[type="url"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 14px;
+    font-family: var(--ui-font);
+    color: var(--text);
+    background: white;
+  }
+
+  .modal-body input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(30,77,148,0.1); }
+
+  .modal-body .link-type-tabs {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+
+  .link-type-tab {
+    flex: 1;
+    padding: 7px 10px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    transition: background 0.1s, color 0.1s;
+    user-select: none;
+  }
+
+  .link-type-tab:last-child { border-right: none; }
+  .link-type-tab.active { background: var(--accent); color: white; }
+
+  .modal-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* ── NOTIFICATIONS ── */
+  #notif {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .notif-item {
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: var(--ui-font);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideIn 0.2s ease;
+    pointer-events: all;
+    max-width: 300px;
+  }
+
+  .notif-success { background: var(--success-bg); color: var(--success); border: 1px solid #bbf7d0; }
+  .notif-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+  .notif-info { background: var(--accent-light); color: var(--accent); border: 1px solid #bfdbfe; }
+
+  @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+  /* ── ARTICLE ACTIONS ── */
+  .article-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-danger {
+    background: white;
+    color: #dc2626;
+    border-color: #fca5a5;
+  }
+
+  .btn-danger:hover { background: #fef2f2; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .page-wrap { grid-template-columns: 1fr; }
+    #sidebar { position: static; }
+    .article-content-wrap { padding: 16px; }
+    #rich-editor { padding: 14px; }
+    .articles-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── ARTICLE INTERNAL LINKS ── */
+  .veridex-link {
+    color: var(--link);
+    text-decoration: none;
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.1s;
+  }
+
+  .veridex-link:hover {
+    border-bottom-color: var(--link);
+    text-decoration: none;
+  }
+
+  /* ── PRINT ── */
+  .no-print { }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="site-header">
+  <div class="header-inner">
+    <div class="logo-wrap" onclick="showHome()">
+      <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="18" fill="#1e4d94" opacity="0.1" stroke="#1e4d94" stroke-width="1.5"/>
+        <circle cx="20" cy="20" r="13" fill="none" stroke="#1e4d94" stroke-width="1"/>
+        <circle cx="20" cy="20" r="8" fill="#1e4d94" opacity="0.15"/>
+        <path d="M20 7 A13 13 0 0 1 33 20" stroke="#1e4d94" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M20 33 A13 13 0 0 1 7 20" stroke="#3366cc" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M13 20 L27 20 M20 13 L20 27" stroke="#1e4d94" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="2" fill="#1e4d94"/>
+      </svg>
+      <div class="logo-text">
+        <span class="logo-name">Veridex</span>
+        <span class="logo-tagline">Die freie Wissenssammlung</span>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <div class="header-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Veridex durchsuchen…" oninput="handleSearch(this.value)" onblur="setTimeout(()=>closeSearch(),150)">
+      </div>
+      <div class="search-results" id="search-dropdown"></div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="showEditor()">✏️ Neuer Artikel</button>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN LAYOUT -->
+<div class="page-wrap">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-section">
+      <h3>Navigation</h3>
+      <ul class="sidebar-nav">
+        <li><a href="#" onclick="showHome();return false;" id="nav-home" class="active">🏠 Hauptseite</a></li>
+        <li><a href="#" onclick="showEditor();return false;">✏️ Artikel erstellen</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <h3>Kategorien</h3>
+      <ul class="sidebar-nav" id="category-list">
+        <li><a href="#" onclick="filterCat('Alle');return false;" class="active" id="cat-all">📚 Alle Artikel</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-stats">
+        <div>Artikel: <strong id="stat-articles">0</strong></div>
+        <div>Kategorien: <strong id="stat-cats">0</strong></div>
+        <div>Veridex v1.0</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENT AREA -->
+  <main>
+
+    <!-- HOME / ARTICLE LIST -->
+    <div id="home-view">
+      <div id="article-list">
+        <div class="al-header">
+          <div>
+            <h1>Veridex</h1>
+            <p>Deine freie Wissenssammlung – erstelle und teile Artikel zu jedem Thema.</p>
+          </div>
+          <button class="btn btn-primary" onclick="showEditor()">✏️ Neuer Artikel</button>
+        </div>
+        <div id="articles-container">
+          <div class="empty-state">
+            <div class="es-icon">📖</div>
+            <h2>Noch keine Artikel</h2>
+            <p>Erstelle den ersten Artikel in Veridex!</p>
+            <br>
+            <button class="btn btn-primary" onclick="showEditor()">✏️ Ersten Artikel erstellen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARTICLE VIEW -->
+    <div id="article-view" style="display:none">
+      <div class="back-btn" onclick="showHome()">← Zurück zur Übersicht</div>
+      <div class="article-tab-bar">
+        <div class="article-tab active" id="tab-read">Artikel</div>
+        <div class="article-tab" id="tab-edit" onclick="editCurrentArticle()">Bearbeiten</div>
+      </div>
+      <div class="article-content-wrap">
+        <h1 class="article-title-display" id="view-title"></h1>
+        <div class="article-byline" id="view-byline"></div>
+        <div class="article-body" id="view-body"></div>
+        <div class="article-tags-display" id="view-tags"></div>
+        <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border-light); display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-secondary" onclick="editCurrentArticle()">✏️ Bearbeiten</button>
+          <button class="btn btn-danger" onclick="deleteCurrentArticle()">🗑️ Löschen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDITOR VIEW -->
+    <div id="editor-view" style="display:none">
+      <div class="back-btn" onclick="showHome()">← Zurück zur Übersicht</div>
+      <div class="editor-wrap">
+        <div class="editor-header">
+          <h2 id="editor-mode-label">Neuer Artikel</h2>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary" onclick="showHome()">Abbrechen</button>
+            <button class="btn btn-primary" onclick="saveArticle()">💾 Speichern</button>
+          </div>
+        </div>
+
+        <input type="text" class="editor-title-input" id="article-title-input" placeholder="Artikeltitel…">
+
+        <div class="editor-meta-row">
+          <label>Kategorie:</label>
+          <input type="text" id="article-category-input" placeholder="z.B. Wissenschaft, Geschichte, Technik…" list="cat-datalist">
+          <datalist id="cat-datalist"></datalist>
+          <label>Tags:</label>
+          <input type="text" id="article-tags-input" placeholder="Kommagetrennte Tags…">
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar" id="main-toolbar">
+
+          <!-- Undo / Redo -->
+          <button class="tb" title="Rückgängig (Strg+Z)" onclick="document.execCommand('undo')">↩</button>
+          <button class="tb" title="Wiederholen (Strg+Y)" onclick="document.execCommand('redo')">↪</button>
+          <div class="toolbar-sep"></div>
+
+          <!-- Überschriften -->
+          <select class="tb-select" title="Absatzformat" onchange="applyFormat(this.value); this.value=''">
+            <option value="">Format…</option>
+            <option value="formatBlock:p">Absatz</option>
+            <option value="formatBlock:h1">Überschrift 1</option>
+            <option value="formatBlock:h2">Überschrift 2</option>
+            <option value="formatBlock:h3">Überschrift 3</option>
+            <option value="formatBlock:blockquote">Zitat</option>
+            <option value="formatBlock:pre">Code</option>
+          </select>
+
+          <!-- Schriftart -->
+          <select class="tb-select" title="Schriftart" onchange="applyFontFamily(this.value); this.value=''">
+            <option value="">Schrift…</option>
+            <option value="'Source Serif 4', Georgia, serif">Source Serif (Standard)</option>
+            <option value="'Linux Libertine Display', Georgia, serif">Libertine (Klassisch)</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="Verdana, sans-serif">Verdana</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Courier New', monospace">Courier New</option>
+            <option value="Impact, sans-serif">Impact</option>
+          </select>
+
+          <!-- Schriftgröße -->
+          <select class="tb-select" title="Schriftgröße" style="width:64px" onchange="applyFontSize(this.value); this.value=''">
+            <option value="">Größe…</option>
+            <option value="10px">10</option>
+            <option value="12px">12</option>
+            <option value="14px">14</option>
+            <option value="15px">15</option>
+            <option value="16px">16</option>
+            <option value="18px">18</option>
+            <option value="20px">20</option>
+            <option value="24px">24</option>
+            <option value="28px">28</option>
+            <option value="32px">32</option>
+            <option value="36px">36</option>
+            <option value="48px">48</option>
+          </select>
+
+          <div class="toolbar-sep"></div>
+
+          <!-- Bold / Italic / Underline / Strike -->
+          <button class="tb" title="Fett (Strg+B)" onclick="document.execCommand('bold')"><strong>F</strong></button>
+          <button class="tb" title="Kursiv (Strg+I)" onclick="document.execCommand('italic')"><em>K</em></button>
+          <button class="tb" title="Unterstrichen (Strg+U)" onclick="document.execCommand('underline')"><u>U</u></button>
+          <button class="tb" title="Durchgestrichen" onclick="document.execCommand('strikeThrough')"><s>S</s></button>
+
+          <div class="toolbar-sep"></div>
+
+          <!-- Textfarbe -->
+          <div class="tb-color-wrap" title="Textfarbe">
+            <span class="tb-color-label">A</span>
+            <input type="color" class="tb-color-input" id="text-color" value="#202122" title="Textfarbe" onchange="applyTextColor(this.value)">
+          </div>
+
+          <!-- Hintergrundfarbe -->
+          <div class="tb-color-wrap" title="Hervorheben">
+            <span class="tb-color-label" style="background:#fff3cd;">✦</span>
+            <input type="color" class="tb-color-input" id="bg-color" value="#ffff00" title="Hintergrundfarbe" onchange="applyBgColor(this.value)">
+          </div>
+
+          <div class="toolbar-sep"></div>
+
+          <!-- Ausrichtung -->
+          <button class="tb" title="Linksbündig" onclick="document.execCommand('justifyLeft')">⬛</button>
+          <button class="tb" title="Zentriert" onclick="document.execCommand('justifyCenter')">▦</button>
+          <button class="tb" title="Rechtsbündig" onclick="document.execCommand('justifyRight')">▣</button>
+          <button class="tb" title="Blocksatz" onclick="document.execCommand('justifyFull')">▤</button>
+
+          <div class="toolbar-sep"></div>
+
+          <!-- Listen -->
+          <button class="tb" title="Aufzählungsliste" onclick="document.execCommand('insertUnorderedList')">• —</button>
+          <button class="tb" title="Nummerierte Liste" onclick="document.execCommand('insertOrderedList')">1.</button>
+          <button class="tb" title="Einrücken" onclick="document.execCommand('indent')">→|</button>
+          <button class="tb" title="Ausrücken" onclick="document.execCommand('outdent')">|←</button>
+
+          <div class="toolbar-sep"></div>
+
+          <!-- HYPERLINK – zentrales Feature -->
+          <button class="tb" title="Hyperlink einfügen (Strg+K)" id="btn-link" onclick="openLinkModal()" style="width:auto; padding:0 8px; font-size:12px; background:#eaf3fb; border-color:#97b6e3;">
+            🔗 Link
+          </button>
+          <button class="tb" title="Link entfernen" onclick="document.execCommand('unlink')" style="width:auto; padding:0 8px; font-size:12px;">
+            🔗✕
+          </button>
+
+          <div class="toolbar-sep"></div>
+
+          <!-- Trennlinie / Löschen -->
+          <button class="tb" title="Horizontale Linie" onclick="document.execCommand('insertHorizontalRule')" style="width:auto;padding:0 6px;font-size:11px;">—hr—</button>
+          <button class="tb" title="Formatierung entfernen" onclick="document.execCommand('removeFormat')" style="font-size:11px;">Tx</button>
+        </div>
+
+        <!-- EDITING AREA -->
+        <div id="rich-editor"
+             contenteditable="true"
+             data-placeholder="Schreibe hier deinen Artikelinhalt… Du kannst Text formatieren, Links einfügen und mehr."
+             oninput="updateToolbarState()"
+             onkeyup="updateToolbarState()"
+             onmouseup="updateToolbarState()"
+             onkeydown="handleEditorKeydown(event)">
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- HYPERLINK MODAL -->
+<div class="modal-overlay" id="link-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🔗 Hyperlink einfügen</h3>
+      <button class="modal-close" onclick="closeLinkModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="link-type-tabs">
+        <div class="link-type-tab active" id="ltt-web" onclick="setLinkType('web')">🌐 Webseite</div>
+        <div class="link-type-tab" id="ltt-internal" onclick="setLinkType('internal')">📄 Veridex-Artikel</div>
+        <div class="link-type-tab" id="ltt-email" onclick="setLinkType('email')">✉️ E-Mail</div>
+      </div>
+
+      <div id="link-web-panel">
+        <label>URL</label>
+        <input type="url" id="link-url" placeholder="https://example.com">
+        <label>Linktext (optional – leer = markierter Text)</label>
+        <input type="text" id="link-text" placeholder="Anzeigetext…">
+      </div>
+
+      <div id="link-internal-panel" style="display:none">
+        <label>Veridex-Artikel auswählen</label>
+        <select class="tb-select" id="link-internal-select" style="width:100%;height:34px;margin-bottom:14px;">
+          <option value="">— Artikel wählen —</option>
+        </select>
+        <label>Linktext (optional)</label>
+        <input type="text" id="link-internal-text" placeholder="Anzeigetext…">
+      </div>
+
+      <div id="link-email-panel" style="display:none">
+        <label>E-Mail-Adresse</label>
+        <input type="text" id="link-email" placeholder="name@example.com">
+        <label>Linktext (optional)</label>
+        <input type="text" id="link-email-text" placeholder="Anzeigetext…">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeLinkModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="insertLink()">🔗 Link einfügen</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div id="notif"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// DATA LAYER
+// ══════════════════════════════════════════════
+let articles = JSON.parse(localStorage.getItem('veridex_articles') || '[]');
+let currentArticleId = null;
+let currentCategory = 'Alle';
+let linkType = 'web';
+let savedRange = null;
+
+function saveData() {
+  localStorage.setItem('veridex_articles', JSON.stringify(articles));
+  updateStats();
+  updateCategoryList();
+  updateCatDatalist();
+}
+
+function genId() {
+  return 'art_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+}
+
+function formatDate(ts) {
+  return new Date(ts).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+// ══════════════════════════════════════════════
+// VIEW MANAGEMENT
+// ══════════════════════════════════════════════
+function showHome() {
+  document.getElementById('home-view').style.display = 'block';
+  document.getElementById('article-view').style.display = 'none';
+  document.getElementById('editor-view').style.display = 'none';
+  document.getElementById('nav-home').classList.add('active');
+  currentArticleId = null;
+  renderArticles();
+  updateStats();
+  updateCategoryList();
+}
+
+function showArticle(id) {
+  const art = articles.find(a => a.id === id);
+  if (!art) return;
+  currentArticleId = id;
+  document.getElementById('home-view').style.display = 'none';
+  document.getElementById('editor-view').style.display = 'none';
+  document.getElementById('article-view').style.display = 'block';
+
+  document.getElementById('view-title').textContent = art.title;
+  document.getElementById('view-byline').textContent =
+    `Erstellt am ${formatDate(art.created)}` +
+    (art.updated ? ` · Zuletzt bearbeitet am ${formatDate(art.updated)}` : '') +
+    (art.category ? ` · Kategorie: ${art.category}` : '');
+
+  // Render body, transform internal links
+  let body = art.body;
+  document.getElementById('view-body').innerHTML = body;
+
+  // Make internal veridex:// links work
+  document.querySelectorAll('#view-body a[href^="veridex://"]').forEach(a => {
+    const slug = a.getAttribute('href').replace('veridex://', '');
+    a.href = '#';
+    a.className = 'veridex-link';
+    a.onclick = (e) => {
+      e.preventDefault();
+      const target = articles.find(x => x.id === slug || x.title.toLowerCase() === slug.toLowerCase());
+      if (target) showArticle(target.id);
+      else notify('Artikel "' + slug + '" nicht gefunden.', 'error');
+    };
+  });
+
+  const tagsEl = document.getElementById('view-tags');
+  if (art.tags && art.tags.length > 0) {
+    tagsEl.innerHTML = '<span>Tags:</span> ' + art.tags.map(t => `<span class="tag">${t}</span>`).join('');
+    tagsEl.style.display = '';
+  } else {
+    tagsEl.style.display = 'none';
+  }
+}
+
+function showEditor(id) {
+  document.getElementById('home-view').style.display = 'none';
+  document.getElementById('article-view').style.display = 'none';
+  document.getElementById('editor-view').style.display = 'block';
+
+  if (id) {
+    const art = articles.find(a => a.id === id);
+    if (!art) return;
+    currentArticleId = id;
+    document.getElementById('editor-mode-label').textContent = 'Artikel bearbeiten';
+    document.getElementById('article-title-input').value = art.title;
+    document.getElementById('article-category-input').value = art.category || '';
+    document.getElementById('article-tags-input').value = (art.tags || []).join(', ');
+    document.getElementById('rich-editor').innerHTML = art.body;
+  } else {
+    currentArticleId = null;
+    document.getElementById('editor-mode-label').textContent = 'Neuer Artikel';
+    document.getElementById('article-title-input').value = '';
+    document.getElementById('article-category-input').value = '';
+    document.getElementById('article-tags-input').value = '';
+    document.getElementById('rich-editor').innerHTML = '';
+  }
+  window.scrollTo(0, 0);
+  setTimeout(() => document.getElementById('article-title-input').focus(), 50);
+  updateCatDatalist();
+}
+
+function editCurrentArticle() {
+  if (currentArticleId) showEditor(currentArticleId);
+}
+
+function deleteCurrentArticle() {
+  if (!currentArticleId) return;
+  const art = articles.find(a => a.id === currentArticleId);
+  if (!art) return;
+  if (!confirm(`Artikel "${art.title}" wirklich löschen?`)) return;
+  articles = articles.filter(a => a.id !== currentArticleId);
+  saveData();
+  notify(`Artikel "${art.title}" gelöscht.`, 'info');
+  showHome();
+}
+
+// ══════════════════════════════════════════════
+// SAVE ARTICLE
+// ══════════════════════════════════════════════
+function saveArticle() {
+  const title = document.getElementById('article-title-input').value.trim();
+  if (!title) { notify('Bitte einen Titel eingeben.', 'error'); document.getElementById('article-title-input').focus(); return; }
+
+  const body = document.getElementById('rich-editor').innerHTML.trim();
+  const bodyText = document.getElementById('rich-editor').innerText.trim();
+  if (!bodyText) { notify('Bitte Inhalt eingeben.', 'error'); return; }
+
+  const category = document.getElementById('article-category-input').value.trim();
+  const tagsRaw = document.getElementById('article-tags-input').value.trim();
+  const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+  if (currentArticleId) {
+    const idx = articles.findIndex(a => a.id === currentArticleId);
+    articles[idx] = { ...articles[idx], title, body, category, tags, updated: Date.now() };
+    saveData();
+    notify(`Artikel "${title}" aktualisiert!`, 'success');
+    showArticle(currentArticleId);
+  } else {
+    const art = { id: genId(), title, body, category, tags, created: Date.now(), updated: null };
+    articles.unshift(art);
+    saveData();
+    notify(`Artikel "${title}" erstellt!`, 'success');
+    showArticle(art.id);
+  }
+}
+
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
+function renderArticles(cat) {
+  cat = cat || currentCategory;
+  const container = document.getElementById('articles-container');
+  let list = cat === 'Alle' ? articles : articles.filter(a => a.category === cat);
+
+  if (list.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="es-icon">${cat === 'Alle' ? '📖' : '📂'}</div>
+      <h2>${cat === 'Alle' ? 'Noch keine Artikel' : 'Keine Artikel in "' + cat + '"'}</h2>
+      <p>${cat === 'Alle' ? 'Erstelle den ersten Artikel!' : 'Wähle eine andere Kategorie oder erstelle einen neuen Artikel.'}</p>
+      <br><button class="btn btn-primary" onclick="showEditor()">✏️ Artikel erstellen</button>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="articles-grid">` +
+    list.map(art => {
+      const plain = art.body.replace(/<[^>]+>/g,'').slice(0,130);
+      return `<div class="article-card" onclick="showArticle('${art.id}')">
+        <div class="ac-header">
+          <div class="ac-title">${esc(art.title)}</div>
+          <div class="ac-meta">${formatDate(art.created)}${art.category ? ' · ' + esc(art.category) : ''}</div>
+        </div>
+        <div class="ac-excerpt">${esc(plain)}${plain.length>=130?'…':''}</div>
+        ${art.tags && art.tags.length > 0 ? '<div class="ac-tags">' + art.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('') + '</div>' : ''}
+      </div>`;
+    }).join('') + '</div>';
+}
+
+function filterCat(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.sidebar-nav .active').forEach(el => el.classList.remove('active'));
+  const id = cat === 'Alle' ? 'cat-all' : 'cat-' + CSS.escape(cat);
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  renderArticles(cat);
+}
+
+function updateCategoryList() {
+  const cats = [...new Set(articles.map(a => a.category).filter(Boolean))].sort();
+  const list = document.getElementById('category-list');
+  list.innerHTML = `<li><a href="#" onclick="filterCat('Alle');return false;" id="cat-all">📚 Alle Artikel</a></li>` +
+    cats.map(c => `<li><a href="#" onclick="filterCat('${esc(c)}');return false;" id="cat-${esc(c)}">📂 ${esc(c)}</a></li>`).join('');
+  const allEl = document.getElementById('cat-all');
+  if (currentCategory === 'Alle' && allEl) allEl.classList.add('active');
+}
+
+function updateStats() {
+  document.getElementById('stat-articles').textContent = articles.length;
+  const cats = [...new Set(articles.map(a => a.category).filter(Boolean))];
+  document.getElementById('stat-cats').textContent = cats.length;
+}
+
+function updateCatDatalist() {
+  const cats = [...new Set(articles.map(a => a.category).filter(Boolean))];
+  document.getElementById('cat-datalist').innerHTML = cats.map(c => `<option value="${esc(c)}">`).join('');
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════════
+function handleSearch(val) {
+  const dd = document.getElementById('search-dropdown');
+  if (!val.trim()) { dd.style.display = 'none'; return; }
+  const q = val.toLowerCase();
+  const results = articles.filter(a =>
+    a.title.toLowerCase().includes(q) ||
+    (a.body||'').replace(/<[^>]+>/g,'').toLowerCase().includes(q) ||
+    (a.category||'').toLowerCase().includes(q) ||
+    (a.tags||[]).some(t => t.toLowerCase().includes(q))
+  ).slice(0, 8);
+
+  if (!results.length) {
+    dd.innerHTML = `<div class="search-result-item"><div class="sri-excerpt">Keine Ergebnisse für "${esc(val)}"</div></div>`;
+  } else {
+    dd.innerHTML = results.map(a => {
+      const plain = (a.body||'').replace(/<[^>]+>/g,'').slice(0,80);
+      return `<div class="search-result-item" onclick="showArticle('${a.id}'); document.getElementById('search-input').value=''; closeSearch();">
+        <span class="sri-icon">📄</span>
+        <div>
+          <div class="sri-title">${esc(a.title)}</div>
+          <div class="sri-excerpt">${esc(plain)}${plain.length>=80?'…':''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  dd.style.display = 'block';
+}
+
+function closeSearch() {
+  document.getElementById('search-dropdown').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════
+// RICH TEXT EDITOR COMMANDS
+// ══════════════════════════════════════════════
+function applyFormat(val) {
+  if (!val) return;
+  const [cmd, arg] = val.split(':');
+  focusEditor();
+  document.execCommand(cmd, false, arg);
+}
+
+function applyFontFamily(val) {
+  if (!val) return;
+  focusEditor();
+  document.execCommand('fontName', false, val);
+  // Override with span style for accurate rendering
+  fixFontExec('fontFamily', val);
+}
+
+function applyFontSize(px) {
+  if (!px) return;
+  focusEditor();
+  fixFontExec('fontSize', px);
+}
+
+function fixFontExec(prop, val) {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+  const range = sel.getRangeAt(0);
+  const span = document.createElement('span');
+  span.style[prop] = val;
+  try {
+    range.surroundContents(span);
+  } catch(e) {
+    document.execCommand('insertHTML', false,
+      `<span style="${prop}:${val}">${range.toString()}</span>`);
+  }
+}
+
+function applyTextColor(hex) {
+  focusEditor();
+  document.execCommand('foreColor', false, hex);
+}
+
+function applyBgColor(hex) {
+  focusEditor();
+  document.execCommand('hiliteColor', false, hex);
+}
+
+function focusEditor() {
+  const ed = document.getElementById('rich-editor');
+  ed.focus();
+  if (savedRange) {
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedRange);
+  }
+}
+
+function handleEditorKeydown(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    openLinkModal();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    saveArticle();
+  }
+}
+
+function updateToolbarState() {
+  // Update saved range for color/font pickers
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+    savedRange = sel.getRangeAt(0).cloneRange();
+  }
+}
+
+// ══════════════════════════════════════════════
+// HYPERLINK MODAL
+// ══════════════════════════════════════════════
+function openLinkModal() {
+  // Save current selection
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) {
+    savedRange = sel.getRangeAt(0).cloneRange();
+  }
+
+  // Pre-fill text from selection
+  const selText = sel ? sel.toString().trim() : '';
+  document.getElementById('link-text').value = selText;
+  document.getElementById('link-internal-text').value = selText;
+  document.getElementById('link-email-text').value = selText;
+  document.getElementById('link-url').value = '';
+  document.getElementById('link-email').value = '';
+
+  // Populate internal article list
+  const sel2 = document.getElementById('link-internal-select');
+  sel2.innerHTML = '<option value="">— Artikel wählen —</option>' +
+    articles.map(a => `<option value="${a.id}">${esc(a.title)}</option>`).join('');
+
+  setLinkType('web');
+  document.getElementById('link-modal').classList.add('open');
+  setTimeout(() => document.getElementById('link-url').focus(), 50);
+}
+
+function closeLinkModal() {
+  document.getElementById('link-modal').classList.remove('open');
+}
+
+function setLinkType(type) {
+  linkType = type;
+  ['web','internal','email'].forEach(t => {
+    document.getElementById('ltt-' + t).classList.toggle('active', t === type);
+    document.getElementById('link-' + t + '-panel').style.display = t === type ? '' : 'none';
+  });
+}
+
+function insertLink() {
+  let href = '', text = '', isInternal = false;
+
+  if (linkType === 'web') {
+    href = document.getElementById('link-url').value.trim();
+    text = document.getElementById('link-text').value.trim();
+    if (!href) { notify('Bitte eine URL eingeben.', 'error'); return; }
+    if (!/^https?:\/\//i.test(href) && !href.startsWith('#')) href = 'https://' + href;
+  } else if (linkType === 'internal') {
+    const artId = document.getElementById('link-internal-select').value;
+    if (!artId) { notify('Bitte einen Artikel auswählen.', 'error'); return; }
+    const art = articles.find(a => a.id === artId);
+    href = 'veridex://' + artId;
+    text = document.getElementById('link-internal-text').value.trim() || art.title;
+    isInternal = true;
+  } else if (linkType === 'email') {
+    const email = document.getElementById('link-email').value.trim();
+    if (!email) { notify('Bitte eine E-Mail-Adresse eingeben.', 'error'); return; }
+    href = 'mailto:' + email;
+    text = document.getElementById('link-email-text').value.trim() || email;
+  }
+
+  // Restore selection and insert link
+  const ed = document.getElementById('rich-editor');
+  ed.focus();
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  if (savedRange) sel.addRange(savedRange);
+
+  const hasSelection = sel && !sel.isCollapsed;
+
+  if (hasSelection && !text) {
+    document.execCommand('createLink', false, href);
+  } else {
+    const linkText = text || href;
+    const a = document.createElement('a');
+    a.href = href;
+    a.textContent = linkText;
+    if (isInternal) a.setAttribute('data-veridex', 'true');
+    const html = a.outerHTML;
+    if (hasSelection) {
+      document.execCommand('insertHTML', false, html);
+    } else {
+      document.execCommand('insertHTML', false, html + '&nbsp;');
+    }
+  }
+
+  closeLinkModal();
+  notify('Link eingefügt!', 'success');
+}
+
+// ══════════════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════════════
+function notify(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = 'notif-item notif-' + type;
+  el.textContent = msg;
+  document.getElementById('notif').appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 2800);
+}
+
+// ══════════════════════════════════════════════
+// KEYBOARD SHORTCUT: Strg+K anywhere in editor
+// ══════════════════════════════════════════════
+document.getElementById('rich-editor').addEventListener('mouseup', updateToolbarState);
+
+// Close search on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeSearch();
+    closeLinkModal();
+  }
+});
+
+// Close modal on overlay click
+document.getElementById('link-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('link-modal')) closeLinkModal();
+});
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+showHome();
+
+// Load a demo article if empty
+if (articles.length === 0) {
+  const demo = {
+    id: genId(),
+    title: 'Willkommen bei Veridex',
+    body: `<h2>Was ist Veridex?</h2>
+<p><strong>Veridex</strong> ist deine <em>persönliche, freie Wissenssammlung</em> – ähnlich wie Wikipedia, aber vollständig in deinem Browser. Du kannst Artikel erstellen, bearbeiten und miteinander verlinken.</p>
+<h2>Funktionen</h2>
+<ul>
+<li>✏️ Rich-Text-Editor mit Formatierungsoptionen</li>
+<li>🔗 Hyperlinks zu externen Seiten oder internen Veridex-Artikeln</li>
+<li>🎨 Textfarbe, Hervorhebung und Schriftartauswahl</li>
+<li>📂 Kategorien und Tags für Artikel</li>
+<li>🔍 Volltextsuche über alle Artikel</li>
+<li>💾 Automatische Speicherung im Browser (localStorage)</li>
+</ul>
+<h2>Loslegen</h2>
+<p>Klicke auf <strong>Neuer Artikel</strong> und fang an zu schreiben! Mit <strong>Strg+K</strong> kannst du im Editor schnell einen Link einfügen.</p>`,
+    category: 'Veridex',
+    tags: ['Einführung', 'Hilfe'],
+    created: Date.now(),
+    updated: null
+  };
+  articles.push(demo);
+  saveData();
+  renderArticles();
+}
+</script>
+</body>
+</html>
