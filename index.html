@@ -428,6 +428,18 @@ function setDbSt(ok) {
   $('dbst').style.color = ok ? '#14532d' : '#dc2626';
 }
 function openFromURL() {
+  const hash = window.location.hash.replace("#/", "").toLowerCase();
+  if (!hash) return;
+
+  const found = Object.entries(articles).find(([id, a]) =>
+    (a.title || "").toLowerCase().replace(/\s+/g, "-") === hash
+  );
+
+  if (found) {
+    showArticle(found[0]);
+  }
+}
+function openFromURL() {
   const path = window.location.pathname.replace("/", "").toLowerCase();
   if (!path) return;
 
@@ -464,10 +476,10 @@ function initFB(cfg) {
       hideLoad(); setDbSt(false);
       notify('DB-Fehler: ' + err.message, 'e');
     });
+     openFromURL();
   } catch(e) {
     hideLoad(); setDbSt(false);
     notify('Firebase-Fehler: ' + e.message, 'e');
-    openFromURL();
   }
 }
 
@@ -538,6 +550,11 @@ window.showHome = () => {
 };
 
 window.showArticle = id => {
+  const a = articles[id];
+if (a && a.title) {
+  const clean = a.title.toLowerCase().replace(/\s+/g, "-");
+  location.hash = "/" + clean;
+}
   const a = articles[id]; if (!a) return;
   curId = id;
   $('home-view').style.display='none';
@@ -717,6 +734,7 @@ initFB(cfg);
 </script>
 
   <script type="module">
+window.addEventListener("hashchange", openFromURL);
 </script>
 </body>
 </html>
