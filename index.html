@@ -455,12 +455,18 @@ function openFromURL() {
 function loadCfg() { try { return JSON.parse(localStorage.getItem('vx_fb')||'null'); } catch(e){ return null; } }
 
 function initFB(cfg) {
+  function initFB(cfg) {
+  console.log("initFB läuft", cfg);
   showLoad('Verbinde mit Firebase…');
   try {
     // Remove any existing app
     getApps().forEach(a => deleteApp(a));
     const app = initializeApp(cfg);
+    const app = initializeApp(cfg);
+console.log("App erstellt", app);
     db = getDatabase(app);
+    db = getDatabase(app);
+console.log("DB:", db);
     if (artRef) off(artRef);
     artRef = ref(db, 'articles');
 onValue(artRef, snap => {
@@ -514,6 +520,7 @@ window.saveSetup = () => {
   closeSetup();
   notify('Gespeichert! Verbinde…','i');
   initFB(cfg);
+  console.log("INIT gestartet");
 };
 
 // ── CRUD ──
