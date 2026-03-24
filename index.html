@@ -448,7 +448,7 @@ function initFB(cfg) {
 
   try {
     // alte Apps löschen
-    getApps().forEach(a => deleteApp(a));
+    getApps().forEach(appInstance => deleteApp(appInstance));
 
     const app = initializeApp(cfg);
     console.log("App erstellt", app);
