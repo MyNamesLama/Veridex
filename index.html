@@ -463,8 +463,18 @@ function initFB(cfg) {
     db = getDatabase(app);
     if (artRef) off(artRef);
     artRef = ref(db, 'articles');
-    onValue(artRef, snap => {
-      articles = snap.val() || {};
+onValue(artRef, snap => {
+  articles = snap.val() || {};
+
+  hideLoad();
+  setDbSt(true);   // 👈 DAS FEHLT BEI DIR
+
+  renderArts();
+  updateStats();
+  updateCats();
+
+  openFromURL();   // (für deine URLs)
+});
       hideLoad();
       setDbSt(true);
       $('statusbar').classList.add('show');
