@@ -1621,25 +1621,121 @@ if (articles.length === 0) {
   saveData();
   renderArticles();
 }
-</script>
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+<!-- Am Ende deines Scripts, direkt vor dem schließenden </body> -->
+<script type="module">
+// ─────────── FIREBASE SETUP ───────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBEVAmPie1dNGiFl8P1Ye1iOl2kyP4iEMU",
-    authDomain: "veridex-9c55b.firebaseapp.com",
-    projectId: "veridex-9c55b",
-    storageBucket: "veridex-9c55b.firebasestorage.app",
-    messagingSenderId: "612306285780",
-    appId: "1:612306285780:web:a7ae3aea7848f9ed19f741"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyBEVAmPie1dNGiFl8P1Ye1iOl2kyP4iEMU",
+  authDomain: "veridex-9c55b.firebaseapp.com",
+  projectId: "veridex-9c55b",
+  storageBucket: "veridex-9c55b.firebasestorage.app",
+  messagingSenderId: "612306285780",
+  appId: "1:612306285780:web:a7ae3aea7848f9ed19f741"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ─────────── LOAD ARTICLES FROM FIREBASE ───────────
+async function loadFirebaseArticles() {
+  try {
+    const snapshot = await getDocs(collection(db, "articles"));
+    const fbArticles = snapshot.docs.map(d => {
+      const data = d.data();
+      return { id: d.id, title: data.title, body: data.body, category: data.category, tags: data.tags || [], created: data.created, updated: data.updated || null };
+    });
+
+    // merge mit lokalem Speicher, lokal zuerst
+    const localIds = articles.map(a => a.id);
+    fbArticles.forEach(a => {
+      if (!localIds.includes(a.id)) articles.push(a);
+    });
+
+    renderArticles();
+    updateStats();
+    updateCategoryList();
+  } catch(e) {
+    console.error("Firebase Load Error:", e);
+  }
+}
+
+// ─────────── SAVE ARTICLE TO FIREBASE ───────────
+async function saveArticleFirebase(article) {
+  try {
+    if (currentArticleId) {
+      const docRef = doc(db, "articles", currentArticleId);
+      await updateDoc(docRef, { ...article });
+    } else {
+      const docRef = await addDoc(collection(db, "articles"), article);
+      article.id = docRef.id;
+    }
+  } catch(e) {
+    console.error("Firebase Save Error:", e);
+  }
+}
+
+// ─────────── DELETE ARTICLE FROM FIREBASE ───────────
+async function deleteArticleFirebase(id) {
+  try {
+    await deleteDoc(doc(db, "articles", id));
+  } catch(e) { console.error("Firebase Delete Error:", e); }
+}
+
+// ─────────── OVERRIDE SAVE ARTICLE ───────────
+const originalSaveArticle = saveArticle;
+saveArticle = function() {
+  const title = document.getElementById('article-title-input').value.trim();
+  const body = document.getElementById('rich-editor').innerHTML.trim();
+  const bodyText = document.getElementById('rich-editor').innerText.trim();
+  const category = document.getElementById('article-category-input').value.trim();
+  const tagsRaw = document.getElementById('article-tags-input').value.trim();
+  const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+  if (!title || !bodyText) {
+    if (!title) notify('Bitte einen Titel eingeben.', 'error');
+    if (!bodyText) notify('Bitte Inhalt eingeben.', 'error');
+    return;
+  }
+
+  let art;
+  if (currentArticleId) {
+    const idx = articles.findIndex(a => a.id === currentArticleId);
+    articles[idx] = { ...articles[idx], title, body, category, tags, updated: Date.now() };
+    art = articles[idx];
+  } else {
+    art = { id: genId(), title, body, category, tags, created: Date.now(), updated: null };
+    articles.unshift(art);
+  }
+
+  // speichern lokal + Firebase
+  saveData();
+  saveArticleFirebase(art);
+
+  notify(currentArticleId ? `Artikel "${title}" aktualisiert!` : `Artikel "${title}" erstellt!`, 'success');
+  showArticle(art.id);
+}
+
+// ─────────── OVERRIDE DELETE ARTICLE ───────────
+const originalDeleteCurrentArticle = deleteCurrentArticle;
+deleteCurrentArticle = function() {
+  if (!currentArticleId) return;
+  const art = articles.find(a => a.id === currentArticleId);
+  if (!art) return;
+  if (!confirm(`Artikel "${art.title}" wirklich löschen?`)) return;
+
+  articles = articles.filter(a => a.id !== currentArticleId);
+  saveData();
+  deleteArticleFirebase(currentArticleId);
+
+  notify(`Artikel "${art.title}" gelöscht.`, 'info');
+  showHome();
+}
+
+// ─────────── INIT FIREBASE LOAD ───────────
+loadFirebaseArticles();
 </script>
 </body>
 </html>
