@@ -555,30 +555,46 @@ window.showHome = () => {
 
 window.showArticle = id => {
   const a = articles[id];
-if (a && a.title) {
-  const clean = a.title.toLowerCase().replace(/\s+/g, "-");
-  location.hash = "/" + clean;
-}
-  const a = articles[id]; if (!a) return;
+  if (!a) return;
+
+  if (a && a.title) {
+    const clean = a.title.toLowerCase().replace(/\s+/g, "-");
+    location.hash = "/" + clean;
+  }
+
   curId = id;
+
   $('home-view').style.display='none';
   $('editor-view').style.display='none';
   $('article-view').style.display='block';
+
   window.scrollTo(0,0);
+
   $('vt').textContent = a.title;
-  $('vbl').textContent = `Erstellt: ${fmtDate(a.created)}` + (a.updated?` · Bearbeitet: ${fmtDate(a.updated)}`:'') + (a.cat?` · Kategorie: ${esc(a.cat)}`:'');
+  $('vbl').textContent =
+    `Erstellt: ${fmtDate(a.created)}` +
+    (a.updated ? ` · Bearbeitet: ${fmtDate(a.updated)}` : '') +
+    (a.cat ? ` · Kategorie: ${esc(a.cat)}` : '');
+
   $('vb').innerHTML = a.body;
+
   // internal links
   $('vb').querySelectorAll('a[href^="veridex://"]').forEach(el => {
     const key = el.getAttribute('href').replace('veridex://','');
-    el.href='#'; el.className='vlink';
-    el.onclick = e => { e.preventDefault(); const t=Object.entries(articles).find(([k,v])=>k===key||v.title.toLowerCase()===key.toLowerCase()); if(t) showArticle(t[0]); else notify(`Artikel "${key}" nicht gefunden.`,'e'); };
-  });
-  const tg = $('vtg');
-  if (a.tags&&a.tags.length) { tg.innerHTML='<span>Tags:</span> '+a.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join(''); tg.style.display=''; }
-  else tg.style.display='none';
-};
+    el.href='#';
+    el.className='vlink';
 
+    el.onclick = e => {
+      e.preventDefault();
+      const t = Object.entries(articles).find(([k,v]) =>
+        k === key || v.title.toLowerCase() === key.toLowerCase()
+      );
+
+      if (t) showArticle(t[0]);
+      else notify(`Artikel "${key}" nicht gefunden.`,'e');
+    };
+  });
+};
 window.showEditor = id => {
   $('home-view').style.display='none';
   $('article-view').style.display='none';
