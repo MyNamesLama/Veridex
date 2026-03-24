@@ -447,7 +447,6 @@ function initFB(cfg) {
   showLoad('Verbinde mit Firebase…');
 
   try {
-    // alte Apps löschen
     getApps().forEach(appInstance => deleteApp(appInstance));
 
     const app = initializeApp(cfg);
@@ -459,27 +458,32 @@ function initFB(cfg) {
     if (artRef) off(artRef);
     artRef = ref(db, 'articles');
 
-onValue(artRef, snap => {
-  articles = snap.val() || {};
+    onValue(artRef, snap => {
+      articles = snap.val() || {};
 
-  hideLoad();
-  setDbSt(true);
+      hideLoad();
+      setDbSt(true);
 
-  $('statusbar').classList.add('show');
+      $('statusbar').classList.add('show');
 
-  renderArts();
-  updateStats();
-  updateCats();
-  updateCdl();
+      renderArts();
+      updateStats();
+      updateCats();
+      updateCdl();
 
-  openFromURL();
+      openFromURL();
 
-}, err => {
-  hideLoad();
-  setDbSt(false);
-  notify('DB-Fehler: ' + err.message, 'e');
-});
+    }, err => {
+      hideLoad();
+      setDbSt(false);
+      notify('DB-Fehler: ' + err.message, 'e');
+    });
 
+  } catch (e) {
+    hideLoad();
+    setDbSt(false);
+    notify('Firebase-Fehler: ' + e.message, 'e');
+  }
 }
 // ── SETUP ──
 window.openSetup = () => {
