@@ -691,32 +691,20 @@ $('smodal').addEventListener('click', e => { if(e.target===$('smodal')) closeSet
 $('rich-editor').addEventListener('mouseup', saveSel);
 
 // ── BOOT ──
-const cfg = loadCfg();
-if (cfg && cfg.apiKey && cfg.databaseURL) {
-  initFB(cfg);
-} else {
-  setTimeout(() => notify('Bitte Firebase einrichten: ⚙️ oben rechts klicken.','i'), 800);
-}
+const cfg = {
+  apiKey: "AIzaSyCth-0G96VlvBfI1uFBKB4bYm1UYnso0gY",
+  authDomain: "test-veridex.firebaseapp.com",
+  databaseURL: "https://test-veridex-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "test-veridex",
+  storageBucket: "test-veridex.firebasestorage.app",
+  messagingSenderId: "647482283678",
+  appId: "1:647482283678:web:ddbf7a0405e338a7dd4d8f"
+};
+
+initFB(cfg);
 </script>
 
   <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBEVAmPie1dNGiFl8P1Ye1iOl2kyP4iEMU",
-    authDomain: "veridex-9c55b.firebaseapp.com",
-    projectId: "veridex-9c55b",
-    storageBucket: "veridex-9c55b.firebasestorage.app",
-    messagingSenderId: "612306285780",
-    appId: "1:612306285780:web:a7ae3aea7848f9ed19f741"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
 </script>
 </body>
 </html>
