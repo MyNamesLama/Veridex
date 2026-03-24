@@ -439,18 +439,6 @@ function openFromURL() {
     showArticle(found[0]);
   }
 }
-function openFromURL() {
-  const path = window.location.pathname.replace("/", "").toLowerCase();
-  if (!path) return;
-
-  const found = Object.entries(articles).find(([id, a]) =>
-    (a.title || "").toLowerCase() === path
-  );
-
-  if (found) {
-    showArticle(found[0]);
-  }
-}
 // ── FIREBASE ──
 function loadCfg() { try { return JSON.parse(localStorage.getItem('vx_fb')||'null'); } catch(e){ return null; } }
 
