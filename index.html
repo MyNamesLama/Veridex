@@ -719,6 +719,10 @@ $('lmodal').addEventListener('click', e => { if(e.target===$('lmodal')) closeLin
 $('smodal').addEventListener('click', e => { if(e.target===$('smodal')) closeSetup(); });
 $('rich-editor').addEventListener('mouseup', saveSel);
 
+<script type="module">
+
+// dein ganzer Code ...
+
 // ── BOOT ──
 const cfg = {
   apiKey: "AIzaSyCth-0G96VlvBfI1uFBKB4bYm1UYnso0gY",
@@ -731,10 +735,10 @@ const cfg = {
 };
 
 initFB(cfg);
-</script>
 
-  <script type="module">
+// 👉 HIER rein (NICHT extra Script!)
 window.addEventListener("hashchange", openFromURL);
+
 </script>
 </body>
 </html>
