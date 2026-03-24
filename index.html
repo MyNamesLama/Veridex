@@ -737,11 +737,6 @@ document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeSearch();
 $('lmodal').addEventListener('click', e => { if(e.target===$('lmodal')) closeLink(); });
 $('smodal').addEventListener('click', e => { if(e.target===$('smodal')) closeSetup(); });
 $('rich-editor').addEventListener('mouseup', saveSel);
-
-<script type="module">
-
-// dein ganzer Code ...
-
 // ── BOOT ──
 const cfg = {
   apiKey: "AIzaSyCth-0G96VlvBfI1uFBKB4bYm1UYnso0gY",
@@ -755,7 +750,7 @@ const cfg = {
 
 initFB(cfg);
 
-// 👉 HIER rein (NICHT extra Script!)
+// URL Listener
 window.addEventListener("hashchange", openFromURL);
 
 </script>
